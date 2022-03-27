@@ -1,593 +1,596 @@
-/*
-Copyright SecureKey Technologies Inc. All Rights Reserved.
-
-SPDX-License-Identifier: Apache-2.0
-*/
-
 package rest
 
 import (
+	connection1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/connection"
+	didexchange1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/didexchange"
+	introduce1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/introduce"
+	issuecredential1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/issuecredential"
+	kms1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/kms"
+	ld1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/ld"
+	mediator1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/mediator"
+	messaging1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/messaging"
+	outofband1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/outofband"
+	outofbandv21 "github.com/hyperledger/aries-framework-go/pkg/controller/command/outofbandv2"
+	presentproof1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/presentproof"
+	vcwallet1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/vcwallet"
+	vdr1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/vdr"
+	verifiable1 "github.com/hyperledger/aries-framework-go/pkg/controller/command/verifiable"
+	connection "github.com/hyperledger/aries-framework-go/pkg/controller/rest/connection"
+	didexchange "github.com/hyperledger/aries-framework-go/pkg/controller/rest/didexchange"
+	introduce "github.com/hyperledger/aries-framework-go/pkg/controller/rest/introduce"
+	issuecredential "github.com/hyperledger/aries-framework-go/pkg/controller/rest/issuecredential"
+	kms "github.com/hyperledger/aries-framework-go/pkg/controller/rest/kms"
+	ld "github.com/hyperledger/aries-framework-go/pkg/controller/rest/ld"
+	mediator "github.com/hyperledger/aries-framework-go/pkg/controller/rest/mediator"
+	messaging "github.com/hyperledger/aries-framework-go/pkg/controller/rest/messaging"
+	outofband "github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofband"
+	outofbandv2 "github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofbandv2"
+	presentproof "github.com/hyperledger/aries-framework-go/pkg/controller/rest/presentproof"
+	rfc0593 "github.com/hyperledger/aries-framework-go/pkg/controller/rest/rfc0593"
+	vcwallet "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vcwallet"
+	vdr "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vdr"
+	verifiable "github.com/hyperledger/aries-framework-go/pkg/controller/rest/verifiable"
+	didclient1 "github.com/trustbloc/agent-sdk/pkg/controller/command/didclient"
+	blindedrouting "github.com/trustbloc/agent-sdk/pkg/controller/rest/blindedrouting"
+	didclient "github.com/trustbloc/agent-sdk/pkg/controller/rest/didclient"
 	"net/http"
-
-	cmddidexch "github.com/hyperledger/aries-framework-go/pkg/controller/command/didexchange"
-	cmdintroduce "github.com/hyperledger/aries-framework-go/pkg/controller/command/introduce"
-	cmdisscred "github.com/hyperledger/aries-framework-go/pkg/controller/command/issuecredential"
-	cmdkms "github.com/hyperledger/aries-framework-go/pkg/controller/command/kms"
-	cmdld "github.com/hyperledger/aries-framework-go/pkg/controller/command/ld"
-	cmdmediator "github.com/hyperledger/aries-framework-go/pkg/controller/command/mediator"
-	cmdmessaging "github.com/hyperledger/aries-framework-go/pkg/controller/command/messaging"
-	cmdoob "github.com/hyperledger/aries-framework-go/pkg/controller/command/outofband"
-	cmdpresproof "github.com/hyperledger/aries-framework-go/pkg/controller/command/presentproof"
-	cmdvcwallet "github.com/hyperledger/aries-framework-go/pkg/controller/command/vcwallet"
-	cmdvdr "github.com/hyperledger/aries-framework-go/pkg/controller/command/vdr"
-	cmdverifiable "github.com/hyperledger/aries-framework-go/pkg/controller/command/verifiable"
-	opdidexch "github.com/hyperledger/aries-framework-go/pkg/controller/rest/didexchange"
-	opintroduce "github.com/hyperledger/aries-framework-go/pkg/controller/rest/introduce"
-	opisscred "github.com/hyperledger/aries-framework-go/pkg/controller/rest/issuecredential"
-	opkms "github.com/hyperledger/aries-framework-go/pkg/controller/rest/kms"
-	opld "github.com/hyperledger/aries-framework-go/pkg/controller/rest/ld"
-	opmediator "github.com/hyperledger/aries-framework-go/pkg/controller/rest/mediator"
-	opmessaging "github.com/hyperledger/aries-framework-go/pkg/controller/rest/messaging"
-	opoob "github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofband"
-	opoobv2 "github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofbandv2"
-	oppresproof "github.com/hyperledger/aries-framework-go/pkg/controller/rest/presentproof"
-	opvcwallet "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vcwallet"
-	opvdr "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vdr"
-	opverifiable "github.com/hyperledger/aries-framework-go/pkg/controller/rest/verifiable"
-
-	cmdblindedrouting "github.com/trustbloc/agent-sdk/pkg/controller/command/blindedrouting"
-	cmddidclient "github.com/trustbloc/agent-sdk/pkg/controller/command/didclient"
-	cmdmediatorclient "github.com/trustbloc/agent-sdk/pkg/controller/command/mediatorclient"
-	opblindedrouting "github.com/trustbloc/agent-sdk/pkg/controller/rest/blindedrouting"
-	opdidclient "github.com/trustbloc/agent-sdk/pkg/controller/rest/didclient"
-	opmediatorclient "github.com/trustbloc/agent-sdk/pkg/controller/rest/mediatorclient"
 )
 
-// endpoint describes the fields for making calls to external agents.
 type endpoint struct {
 	Path   string
 	Method string
 }
 
-func getControllerEndpoints() map[string]map[string]*endpoint {
-	allEndpoints := make(map[string]map[string]*endpoint)
+func EndPoints() map[string]map[string]endpoint {
+	endpoints := make(map[string]map[string]endpoint)
 
-	allEndpoints[opintroduce.OperationID] = getIntroduceEndpoints()
-	allEndpoints[opverifiable.VerifiableOperationID] = getVerifiableEndpoints()
-	allEndpoints[opdidclient.OperationID] = getDIDClientEndpoints()
-	allEndpoints[opdidexch.OperationID] = getDIDExchangeEndpoints()
-	allEndpoints[opisscred.OperationID] = getIssueCredentialEndpoints()
-	allEndpoints[oppresproof.OperationID] = getPresentProofEndpoints()
-	allEndpoints[opvdr.VDROperationID] = getVDREndpoints()
-	allEndpoints[opmediator.RouteOperationID] = getMediatorEndpoints()
-	allEndpoints[opmessaging.MsgServiceOperationID] = getMessagingEndpoints()
-	allEndpoints[opoob.OperationID] = getOutOfBandEndpoints()
-	allEndpoints[opoobv2.OperationID] = getOutOfBandV2Endpoints()
-	allEndpoints[opkms.KmsOperationID] = getKMSEndpoints()
-	allEndpoints[opmediatorclient.OperationID] = getMediatorClientEndpoints()
-	allEndpoints[opblindedrouting.OperationID] = getBlindedRoutingEndpoints()
-	allEndpoints[opvcwallet.OperationID] = getVCWalletEndpoints()
-	allEndpoints[opld.OperationID] = getLDEndpoints()
-
-	return allEndpoints
-}
-
-func getIntroduceEndpoints() map[string]*endpoint { // nolint: dupl
-	return map[string]*endpoint{
-		cmdintroduce.Actions: {
-			Path:   opintroduce.Actions,
-			Method: http.MethodGet,
-		},
-		cmdintroduce.SendProposal: {
-			Path:   opintroduce.SendProposal,
+	endpoints[connection.OperationID] = map[string]endpoint{
+		connection1.CreateV2CommandMethod: {
 			Method: http.MethodPost,
+			Path:   connection.CreateV2,
 		},
-		cmdintroduce.SendProposalWithOOBInvitation: {
-			Path:   opintroduce.SendProposalWithOOBInvitation,
+		connection1.RotateDIDCommandMethod: {
 			Method: http.MethodPost,
+			Path:   connection.RotateDID,
 		},
-		cmdintroduce.SendRequest: {
-			Path:   opintroduce.SendRequest,
+		connection1.SetToV2CommandMethod: {
 			Method: http.MethodPost,
-		},
-		cmdintroduce.AcceptProposalWithOOBInvitation: {
-			Path:   opintroduce.AcceptProposalWithOOBInvitation,
-			Method: http.MethodPost,
-		},
-		cmdintroduce.AcceptProposal: {
-			Path:   opintroduce.AcceptProposal,
-			Method: http.MethodPost,
-		},
-		cmdintroduce.AcceptRequestWithPublicOOBInvitation: {
-			Path:   opintroduce.AcceptRequestWithPublicOOBInvitation,
-			Method: http.MethodPost,
-		},
-		cmdintroduce.AcceptRequestWithRecipients: {
-			Path:   opintroduce.AcceptRequestWithRecipients,
-			Method: http.MethodPost,
-		},
-		cmdintroduce.DeclineProposal: {
-			Path:   opintroduce.DeclineProposal,
-			Method: http.MethodPost,
-		},
-		cmdintroduce.DeclineRequest: {
-			Path:   opintroduce.DeclineRequest,
-			Method: http.MethodPost,
-		},
-		cmdintroduce.AcceptProblemReport: {
-			Path:   opintroduce.AcceptProblemReport,
-			Method: http.MethodPost,
+			Path:   connection.SetToV2,
 		},
 	}
-}
-
-func getVerifiableEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdverifiable.ValidateCredentialCommandMethod: {
-			Path:   opverifiable.ValidateCredentialPath,
+	endpoints[didexchange.OperationID] = map[string]endpoint{
+		didexchange1.AcceptExchangeRequestCommandMethod: {
 			Method: http.MethodPost,
+			Path:   didexchange.AcceptExchangeRequest,
 		},
-		cmdverifiable.SaveCredentialCommandMethod: {
-			Path:   opverifiable.SaveCredentialPath,
+		didexchange1.AcceptInvitationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   didexchange.AcceptInvitation,
 		},
-		cmdverifiable.SavePresentationCommandMethod: {
-			Path:   opverifiable.SavePresentationPath,
+		didexchange1.CreateConnectionCommandMethod: {
 			Method: http.MethodPost,
+			Path:   didexchange.CreateConnection,
 		},
-		cmdverifiable.GetCredentialCommandMethod: {
-			Path:   opverifiable.GetCredentialPath,
-			Method: http.MethodGet,
-		},
-		cmdverifiable.SignCredentialCommandMethod: {
-			Path:   opverifiable.SignCredentialsPath,
+		didexchange1.CreateImplicitInvitationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   didexchange.CreateImplicitInvitation,
 		},
-		cmdverifiable.GetPresentationCommandMethod: {
-			Path:   opverifiable.GetPresentationPath,
-			Method: http.MethodGet,
-		},
-		cmdverifiable.GetCredentialByNameCommandMethod: {
-			Path:   opverifiable.GetCredentialByNamePath,
-			Method: http.MethodGet,
-		},
-		cmdverifiable.GetCredentialsCommandMethod: {
-			Path:   opverifiable.GetCredentialsPath,
-			Method: http.MethodGet,
-		},
-		cmdverifiable.GetPresentationsCommandMethod: {
-			Path:   opverifiable.GetPresentationsPath,
-			Method: http.MethodGet,
-		},
-		cmdverifiable.GeneratePresentationCommandMethod: {
-			Path:   opverifiable.GeneratePresentationPath,
+		didexchange1.CreateInvitationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   didexchange.CreateInvitation,
 		},
-		cmdverifiable.GeneratePresentationByIDCommandMethod: {
-			Path:   opverifiable.GeneratePresentationByIDPath,
+		didexchange1.QueryConnectionByIDCommandMethod: {
 			Method: http.MethodPost,
+			Path:   didexchange.QueryConnectionByID,
 		},
-		cmdverifiable.RemoveCredentialByNameCommandMethod: {
-			Path:   opverifiable.RemoveCredentialByNamePath,
+		didexchange1.QueryConnectionsCommandMethod: {
 			Method: http.MethodPost,
+			Path:   didexchange.QueryConnections,
 		},
-		cmdverifiable.RemovePresentationByNameCommandMethod: {
-			Path:   opverifiable.RemovePresentationByNamePath,
+		didexchange1.ReceiveInvitationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   didexchange.ReceiveInvitation,
+		},
+		didexchange1.RemoveConnectionCommandMethod: {
+			Method: http.MethodPost,
+			Path:   didexchange.RemoveConnection,
 		},
 	}
-}
-
-func getDIDClientEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmddidclient.CreateOrbDIDCommandMethod: {
-			Path:   opdidclient.CreateOrbDIDPath,
+	endpoints[introduce.OperationID] = map[string]endpoint{
+		introduce1.AcceptProblemReportCommandMethod: {
 			Method: http.MethodPost,
+			Path:   introduce.AcceptProblemReport,
 		},
-		cmddidclient.ResolveOrbDIDCommandMethod: {
-			Path:   opdidclient.ResolveOrbDIDPath,
+		introduce1.AcceptProposalCommandMethod: {
 			Method: http.MethodPost,
+			Path:   introduce.AcceptProposal,
 		},
-		cmddidclient.CreatePeerDIDCommandMethod: {
-			Path:   opdidclient.CreatePeerDIDPath,
+		introduce1.AcceptProposalWithOOBInvitationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   introduce.AcceptProposalWithOOBInvitation,
+		},
+		introduce1.AcceptRequestWithPublicOOBInvitationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   introduce.AcceptRequestWithPublicOOBInvitation,
+		},
+		introduce1.AcceptRequestWithRecipientsCommandMethod: {
+			Method: http.MethodPost,
+			Path:   introduce.AcceptRequestWithRecipients,
+		},
+		introduce1.ActionsCommandMethod: {
+			Method: http.MethodPost,
+			Path:   introduce.Actions,
+		},
+		introduce1.DeclineProposalCommandMethod: {
+			Method: http.MethodPost,
+			Path:   introduce.DeclineProposal,
+		},
+		introduce1.DeclineRequestCommandMethod: {
+			Method: http.MethodPost,
+			Path:   introduce.DeclineRequest,
+		},
+		introduce1.SendProposalCommandMethod: {
+			Method: http.MethodPost,
+			Path:   introduce.SendProposal,
+		},
+		introduce1.SendProposalWithOOBInvitationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   introduce.SendProposalWithOOBInvitation,
+		},
+		introduce1.SendRequestCommandMethod: {
+			Method: http.MethodPost,
+			Path:   introduce.SendRequest,
 		},
 	}
-}
-
-func getDIDExchangeEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmddidexch.CreateInvitationCommandMethod: {
-			Path:   opdidexch.CreateInvitationPath,
+	endpoints[issuecredential.OperationID] = map[string]endpoint{
+		issuecredential1.AcceptCredentialCommandMethod: {
 			Method: http.MethodPost,
+			Path:   issuecredential.AcceptCredential,
 		},
-		cmddidexch.ReceiveInvitationCommandMethod: {
-			Path:   opdidexch.ReceiveInvitationPath,
+		issuecredential1.AcceptOfferCommandMethod: {
 			Method: http.MethodPost,
+			Path:   issuecredential.AcceptOffer,
 		},
-		cmddidexch.AcceptInvitationCommandMethod: {
-			Path:   opdidexch.AcceptInvitationPath,
+		issuecredential1.AcceptProblemReportCommandMethod: {
 			Method: http.MethodPost,
+			Path:   issuecredential.AcceptProblemReport,
 		},
-		cmddidexch.CreateImplicitInvitationCommandMethod: {
-			Path:   opdidexch.CreateImplicitInvitationPath,
+		issuecredential1.AcceptProposalCommandMethod: {
 			Method: http.MethodPost,
+			Path:   issuecredential.AcceptProposal,
 		},
-		cmddidexch.AcceptExchangeRequestCommandMethod: {
-			Path:   opdidexch.AcceptExchangeRequest,
+		issuecredential1.AcceptProposalV3CommandMethod: {
 			Method: http.MethodPost,
+			Path:   issuecredential.AcceptProposalV3,
 		},
-		cmddidexch.QueryConnectionsCommandMethod: {
-			Path:   opdidexch.Connections,
-			Method: http.MethodGet,
-		},
-		cmddidexch.QueryConnectionByIDCommandMethod: {
-			Path:   opdidexch.ConnectionsByID,
-			Method: http.MethodGet,
-		},
-		cmddidexch.CreateConnectionCommandMethod: {
-			Path:   opdidexch.CreateConnection,
+		issuecredential1.AcceptRequestCommandMethod: {
 			Method: http.MethodPost,
+			Path:   issuecredential.AcceptRequest,
 		},
-		cmddidexch.RemoveConnectionCommandMethod: {
-			Path:   opdidexch.RemoveConnection,
+		issuecredential1.AcceptRequestV3CommandMethod: {
 			Method: http.MethodPost,
+			Path:   issuecredential.AcceptRequestV3,
+		},
+		issuecredential1.ActionsCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.Actions,
+		},
+		issuecredential1.DeclineCredentialCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.DeclineCredential,
+		},
+		issuecredential1.DeclineOfferCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.DeclineOffer,
+		},
+		issuecredential1.DeclineProposalCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.DeclineProposal,
+		},
+		issuecredential1.DeclineRequestCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.DeclineRequest,
+		},
+		issuecredential1.NegotiateProposalCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.NegotiateProposal,
+		},
+		issuecredential1.NegotiateProposalV3CommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.NegotiateProposalV3,
+		},
+		issuecredential1.SendOfferCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.SendOffer,
+		},
+		issuecredential1.SendProposalCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.SendProposal,
+		},
+		issuecredential1.SendProposalV3CommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.SendProposalV3,
+		},
+		issuecredential1.SendRequestCommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.SendRequest,
+		},
+		issuecredential1.SendRequestV3CommandMethod: {
+			Method: http.MethodPost,
+			Path:   issuecredential.SendRequestV3,
 		},
 	}
-}
-
-func getIssueCredentialEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdisscred.Actions: {
-			Path:   opisscred.Actions,
-			Method: http.MethodGet,
-		},
-		cmdisscred.SendOffer: {
-			Path:   opisscred.SendOffer,
+	endpoints[kms.OperationID] = map[string]endpoint{
+		kms1.CreateKeySetCommandMethod: {
 			Method: http.MethodPost,
+			Path:   kms.CreateKeySet,
 		},
-		cmdisscred.SendProposal: {
-			Path:   opisscred.SendProposal,
+		kms1.ImportKeyCommandMethod: {
 			Method: http.MethodPost,
-		},
-		cmdisscred.SendRequest: {
-			Path:   opisscred.SendRequest,
-			Method: http.MethodPost,
-		},
-		cmdisscred.AcceptProposal: {
-			Path:   opisscred.AcceptProposal,
-			Method: http.MethodPost,
-		},
-		cmdisscred.NegotiateProposal: {
-			Path:   opisscred.NegotiateProposal,
-			Method: http.MethodPost,
-		},
-		cmdisscred.DeclineProposal: {
-			Path:   opisscred.DeclineProposal,
-			Method: http.MethodPost,
-		},
-		cmdisscred.AcceptOffer: {
-			Path:   opisscred.AcceptOffer,
-			Method: http.MethodPost,
-		},
-		cmdisscred.AcceptProblemReport: {
-			Path:   opisscred.AcceptProblemReport,
-			Method: http.MethodPost,
-		},
-		cmdisscred.DeclineOffer: {
-			Path:   opisscred.DeclineOffer,
-			Method: http.MethodPost,
-		},
-		cmdisscred.AcceptRequest: {
-			Path:   opisscred.AcceptRequest,
-			Method: http.MethodPost,
-		},
-		cmdisscred.DeclineRequest: {
-			Path:   opisscred.DeclineRequest,
-			Method: http.MethodPost,
-		},
-		cmdisscred.AcceptCredential: {
-			Path:   opisscred.AcceptCredential,
-			Method: http.MethodPost,
-		},
-		cmdisscred.DeclineCredential: {
-			Path:   opisscred.DeclineCredential,
-			Method: http.MethodPost,
+			Path:   kms.ImportKey,
 		},
 	}
-}
-
-func getPresentProofEndpoints() map[string]*endpoint { // nolint: dupl
-	return map[string]*endpoint{
-		cmdpresproof.Actions: {
-			Path:   oppresproof.Actions,
-			Method: http.MethodGet,
-		},
-		cmdpresproof.SendRequestPresentation: {
-			Path:   oppresproof.SendRequestPresentation,
+	endpoints[ld.OperationID] = map[string]endpoint{
+		ld1.AddContextsCommandMethod: {
 			Method: http.MethodPost,
+			Path:   ld.AddContexts,
 		},
-		cmdpresproof.SendProposePresentation: {
-			Path:   oppresproof.SendProposePresentation,
+		ld1.AddRemoteProviderCommandMethod: {
 			Method: http.MethodPost,
+			Path:   ld.AddRemoteProvider,
 		},
-		cmdpresproof.AcceptRequestPresentation: {
-			Path:   oppresproof.AcceptRequestPresentation,
+		ld1.DeleteRemoteProviderCommandMethod: {
 			Method: http.MethodPost,
+			Path:   ld.DeleteRemoteProvider,
 		},
-		cmdpresproof.NegotiateRequestPresentation: {
-			Path:   oppresproof.NegotiateRequestPresentation,
+		ld1.GetAllRemoteProvidersCommandMethod: {
 			Method: http.MethodPost,
+			Path:   ld.GetAllRemoteProviders,
 		},
-		cmdpresproof.DeclineRequestPresentation: {
-			Path:   oppresproof.DeclineRequestPresentation,
+		ld1.RefreshAllRemoteProvidersCommandMethod: {
 			Method: http.MethodPost,
+			Path:   ld.RefreshAllRemoteProviders,
 		},
-		cmdpresproof.AcceptProposePresentation: {
-			Path:   oppresproof.AcceptProposePresentation,
+		ld1.RefreshRemoteProviderCommandMethod: {
 			Method: http.MethodPost,
-		},
-		cmdpresproof.DeclineProposePresentation: {
-			Path:   oppresproof.DeclineProposePresentation,
-			Method: http.MethodPost,
-		},
-		cmdpresproof.AcceptPresentation: {
-			Path:   oppresproof.AcceptPresentation,
-			Method: http.MethodPost,
-		},
-		cmdpresproof.AcceptProblemReport: {
-			Path:   oppresproof.AcceptProblemReport,
-			Method: http.MethodPost,
-		},
-		cmdpresproof.DeclinePresentation: {
-			Path:   oppresproof.DeclinePresentation,
-			Method: http.MethodPost,
+			Path:   ld.RefreshRemoteProvider,
 		},
 	}
-}
-
-func getVDREndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdvdr.GetDIDCommandMethod: {
-			Path:   opvdr.GetDIDPath,
-			Method: http.MethodGet,
-		},
-		cmdvdr.GetDIDsCommandMethod: {
-			Path:   opvdr.GetDIDRecordsPath,
-			Method: http.MethodGet,
-		},
-		cmdvdr.SaveDIDCommandMethod: {
-			Path:   opvdr.SaveDIDPath,
+	endpoints[mediator.OperationID] = map[string]endpoint{
+		mediator1.BatchPickupCommandMethod: {
 			Method: http.MethodPost,
+			Path:   mediator.BatchPickup,
 		},
-		cmdvdr.ResolveDIDCommandMethod: {
-			Path:   opvdr.ResolveDIDPath,
-			Method: http.MethodGet,
+		mediator1.GetConnectionsCommandMethod: {
+			Method: http.MethodPost,
+			Path:   mediator.GetConnections,
+		},
+		mediator1.ReconnectAllCommandMethod: {
+			Method: http.MethodPost,
+			Path:   mediator.ReconnectAll,
+		},
+		mediator1.ReconnectCommandMethod: {
+			Method: http.MethodPost,
+			Path:   mediator.Reconnect,
+		},
+		mediator1.RegisterCommandMethod: {
+			Method: http.MethodPost,
+			Path:   mediator.Register,
+		},
+		mediator1.StatusCommandMethod: {
+			Method: http.MethodPost,
+			Path:   mediator.Status,
+		},
+		mediator1.UnregisterCommandMethod: {
+			Method: http.MethodPost,
+			Path:   mediator.Unregister,
 		},
 	}
-}
-
-func getMediatorEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdmediator.RegisterCommandMethod: {
-			Path:   opmediator.RegisterPath,
+	endpoints[messaging.OperationID] = map[string]endpoint{
+		messaging1.RegisterHTTPMessageServiceCommandMethod: {
 			Method: http.MethodPost,
+			Path:   messaging.RegisterHTTPMessageService,
 		},
-		cmdmediator.UnregisterCommandMethod: {
-			Path:   opmediator.UnregisterPath,
-			Method: http.MethodDelete,
-		},
-		cmdmediator.GetConnectionsCommandMethod: {
-			Path:   opmediator.GetConnectionsPath,
-			Method: http.MethodGet,
-		},
-		cmdmediator.ReconnectCommandMethod: {
-			Path:   opmediator.ReconnectPath,
+		messaging1.RegisterMessageServiceCommandMethod: {
 			Method: http.MethodPost,
+			Path:   messaging.RegisterMessageService,
 		},
-		cmdmediator.ReconnectAllCommandMethod: {
-			Path:   opmediator.ReconnectAllPath,
-			Method: http.MethodGet,
-		},
-		cmdmediator.StatusCommandMethod: {
-			Path:   opmediator.StatusPath,
+		messaging1.RegisteredServicesCommandMethod: {
 			Method: http.MethodPost,
+			Path:   messaging.RegisteredServices,
 		},
-		cmdmediator.BatchPickupCommandMethod: {
-			Path:   opmediator.BatchPickupPath,
+		messaging1.SendNewMessageCommandMethod: {
 			Method: http.MethodPost,
+			Path:   messaging.SendNewMessage,
+		},
+		messaging1.SendReplyMessageCommandMethod: {
+			Method: http.MethodPost,
+			Path:   messaging.SendReplyMessage,
+		},
+		messaging1.UnregisterMessageServiceCommandMethod: {
+			Method: http.MethodPost,
+			Path:   messaging.UnregisterMessageService,
 		},
 	}
-}
-
-func getMessagingEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdmessaging.RegisterMessageServiceCommandMethod: {
-			Path:   opmessaging.RegisterMsgService,
+	endpoints[outofband.OperationID] = map[string]endpoint{
+		outofband1.AcceptInvitationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   outofband.AcceptInvitation,
 		},
-		cmdmessaging.UnregisterMessageServiceCommandMethod: {
-			Path:   opmessaging.UnregisterMsgService,
+		outofband1.ActionContinueCommandMethod: {
 			Method: http.MethodPost,
+			Path:   outofband.ActionContinue,
 		},
-		cmdmessaging.RegisteredServicesCommandMethod: {
-			Path:   opmessaging.MsgServiceList,
-			Method: http.MethodGet,
-		},
-		cmdmessaging.SendNewMessageCommandMethod: {
-			Path:   opmessaging.SendNewMsg,
+		outofband1.ActionStopCommandMethod: {
 			Method: http.MethodPost,
+			Path:   outofband.ActionStop,
 		},
-		cmdmessaging.SendReplyMessageCommandMethod: {
-			Path:   opmessaging.SendReplyMsg,
+		outofband1.ActionsCommandMethod: {
 			Method: http.MethodPost,
+			Path:   outofband.Actions,
 		},
-		cmdmessaging.RegisterHTTPMessageServiceCommandMethod: {
-			Path:   opmessaging.RegisterHTTPOverDIDCommService,
+		outofband1.CreateInvitationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   outofband.CreateInvitation,
 		},
 	}
-}
-
-func getOutOfBandEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdoob.Actions: {
-			Path:   opoob.Actions,
-			Method: http.MethodGet,
-		},
-		cmdoob.AcceptInvitation: {
-			Path:   opoob.AcceptInvitation,
+	endpoints[outofbandv2.OperationID] = map[string]endpoint{
+		outofbandv21.AcceptInvitationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   outofbandv2.AcceptInvitation,
 		},
-		cmdoob.CreateInvitation: {
-			Path:   opoob.CreateInvitation,
+		outofbandv21.CreateInvitationCommandMethod: {
 			Method: http.MethodPost,
-		},
-		cmdoob.ActionContinue: {
-			Path:   opoob.ActionContinue,
-			Method: http.MethodPost,
-		},
-		cmdoob.ActionStop: {
-			Path:   opoob.ActionStop,
-			Method: http.MethodPost,
+			Path:   outofbandv2.CreateInvitation,
 		},
 	}
-}
-
-func getOutOfBandV2Endpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdoob.AcceptInvitation: {
-			Path:   opoobv2.AcceptInvitation,
+	endpoints[presentproof.OperationID] = map[string]endpoint{
+		presentproof1.AcceptPresentationCommandMethod: {
 			Method: http.MethodPost,
+			Path:   presentproof.AcceptPresentation,
 		},
-		cmdoob.CreateInvitation: {
-			Path:   opoobv2.CreateInvitation,
+		presentproof1.AcceptProblemReportCommandMethod: {
 			Method: http.MethodPost,
+			Path:   presentproof.AcceptProblemReport,
+		},
+		presentproof1.AcceptProposePresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.AcceptProposePresentation,
+		},
+		presentproof1.AcceptProposePresentationV3CommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.AcceptProposePresentationV3,
+		},
+		presentproof1.AcceptRequestPresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.AcceptRequestPresentation,
+		},
+		presentproof1.AcceptRequestPresentationV3CommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.AcceptRequestPresentationV3,
+		},
+		presentproof1.ActionsCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.Actions,
+		},
+		presentproof1.DeclinePresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.DeclinePresentation,
+		},
+		presentproof1.DeclineProposePresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.DeclineProposePresentation,
+		},
+		presentproof1.DeclineRequestPresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.DeclineRequestPresentation,
+		},
+		presentproof1.NegotiateRequestPresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.NegotiateRequestPresentation,
+		},
+		presentproof1.NegotiateRequestPresentationV3CommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.NegotiateRequestPresentationV3,
+		},
+		presentproof1.SendProposePresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.SendProposePresentation,
+		},
+		presentproof1.SendProposePresentationV3CommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.SendProposePresentationV3,
+		},
+		presentproof1.SendRequestPresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.SendRequestPresentation,
+		},
+		presentproof1.SendRequestPresentationV3CommandMethod: {
+			Method: http.MethodPost,
+			Path:   presentproof.SendRequestPresentationV3,
 		},
 	}
-}
-
-func getKMSEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdkms.CreateKeySetCommandMethod: {
-			Path:   opkms.CreateKeySetPath,
+	endpoints[rfc0593.OperationID] = map[string]endpoint{}
+	endpoints[vcwallet.OperationID] = map[string]endpoint{
+		vcwallet1.AddCommandMethod: {
 			Method: http.MethodPost,
+			Path:   vcwallet.Add,
 		},
-		cmdkms.ImportKeyCommandMethod: {
-			Path:   opkms.ImportKeyPath,
+		vcwallet1.CloseCommandMethod: {
 			Method: http.MethodPost,
+			Path:   vcwallet.Close,
+		},
+		vcwallet1.ConnectCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Connect,
+		},
+		vcwallet1.CreateKeyPairCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.CreateKeyPair,
+		},
+		vcwallet1.CreateProfileCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.CreateProfile,
+		},
+		vcwallet1.DeriveCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Derive,
+		},
+		vcwallet1.GetAllCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.GetAll,
+		},
+		vcwallet1.GetCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Get,
+		},
+		vcwallet1.IssueCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Issue,
+		},
+		vcwallet1.OpenCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Open,
+		},
+		vcwallet1.PresentProofCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.PresentProof,
+		},
+		vcwallet1.ProfileExistsCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.ProfileExists,
+		},
+		vcwallet1.ProposeCredentialCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.ProposeCredential,
+		},
+		vcwallet1.ProposePresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.ProposePresentation,
+		},
+		vcwallet1.ProveCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Prove,
+		},
+		vcwallet1.QueryCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Query,
+		},
+		vcwallet1.RemoveCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Remove,
+		},
+		vcwallet1.RequestCredentialCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.RequestCredential,
+		},
+		vcwallet1.ResolveCredentialManifestCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.ResolveCredentialManifest,
+		},
+		vcwallet1.UpdateProfileCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.UpdateProfile,
+		},
+		vcwallet1.VerifyCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vcwallet.Verify,
 		},
 	}
-}
-
-func getMediatorClientEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdmediatorclient.Connect: {
-			Path:   opmediatorclient.ConnectPath,
+	endpoints[vdr.OperationID] = map[string]endpoint{
+		vdr1.CreateDIDCommandMethod: {
 			Method: http.MethodPost,
+			Path:   vdr.CreateDID,
 		},
-		cmdmediatorclient.CreateInvitation: {
-			Path:   opmediatorclient.CreateInvitationPath,
+		vdr1.GetDIDCommandMethod: {
 			Method: http.MethodPost,
+			Path:   vdr.GetDID,
 		},
-		cmdmediatorclient.SendCreateConnectionRequest: {
-			Path:   opmediatorclient.SendCreateConnectionRequest,
+		vdr1.GetDIDsCommandMethod: {
 			Method: http.MethodPost,
+			Path:   vdr.GetDIDs,
+		},
+		vdr1.ResolveDIDCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vdr.ResolveDID,
+		},
+		vdr1.SaveDIDCommandMethod: {
+			Method: http.MethodPost,
+			Path:   vdr.SaveDID,
 		},
 	}
-}
-
-func getBlindedRoutingEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdblindedrouting.SendDIDDocRequest: {
-			Path:   opblindedrouting.SendDIDDocRequestPath,
+	endpoints[verifiable.OperationID] = map[string]endpoint{
+		verifiable1.DeriveCredentialCommandMethod: {
 			Method: http.MethodPost,
+			Path:   verifiable.DeriveCredential,
 		},
-		cmdblindedrouting.SendRegisterRouteRequest: {
-			Path:   opblindedrouting.SendRegisterRouteRequest,
+		verifiable1.GeneratePresentationByIDCommandMethod: {
 			Method: http.MethodPost,
+			Path:   verifiable.GeneratePresentationByID,
+		},
+		verifiable1.GeneratePresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.GeneratePresentation,
+		},
+		verifiable1.GetCredentialByNameCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.GetCredentialByName,
+		},
+		verifiable1.GetCredentialCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.GetCredential,
+		},
+		verifiable1.GetCredentialsCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.GetCredentials,
+		},
+		verifiable1.GetPresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.GetPresentation,
+		},
+		verifiable1.GetPresentationsCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.GetPresentations,
+		},
+		verifiable1.RemoveCredentialByNameCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.RemoveCredentialByName,
+		},
+		verifiable1.RemovePresentationByNameCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.RemovePresentationByName,
+		},
+		verifiable1.SaveCredentialCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.SaveCredential,
+		},
+		verifiable1.SavePresentationCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.SavePresentation,
+		},
+		verifiable1.SignCredentialCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.SignCredential,
+		},
+		verifiable1.ValidateCredentialCommandMethod: {
+			Method: http.MethodPost,
+			Path:   verifiable.ValidateCredential,
 		},
 	}
-}
-
-func getVCWalletEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdvcwallet.CreateProfileMethod: {
-			Path: opvcwallet.CreateProfilePath, Method: http.MethodPost,
+	endpoints[blindedrouting.OperationID] = map[string]endpoint{}
+	endpoints[didclient.OperationID] = map[string]endpoint{
+		didclient1.CreateOrbDIDCommandMethod: {
+			Method: http.MethodPost,
+			Path:   didclient.CreateOrbDID,
 		},
-		cmdvcwallet.UpdateProfileMethod: {
-			Path: opvcwallet.UpdateProfilePath, Method: http.MethodPost,
+		didclient1.CreatePeerDIDCommandMethod: {
+			Method: http.MethodPost,
+			Path:   didclient.CreatePeerDID,
 		},
-		cmdvcwallet.ProfileExistsMethod: {
-			Path: opvcwallet.ProfileExistsPath, Method: http.MethodGet,
-		},
-		cmdvcwallet.OpenMethod: {
-			Path: opvcwallet.OpenPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.CloseMethod: {
-			Path: opvcwallet.ClosePath, Method: http.MethodPost,
-		},
-		cmdvcwallet.AddMethod: {
-			Path: opvcwallet.AddPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.RemoveMethod: {
-			Path: opvcwallet.RemovePath, Method: http.MethodPost,
-		},
-		cmdvcwallet.GetMethod: {
-			Path: opvcwallet.GetPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.GetAllMethod: {
-			Path: opvcwallet.GetAllPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.QueryMethod: {
-			Path: opvcwallet.QueryPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.IssueMethod: {
-			Path: opvcwallet.IssuePath, Method: http.MethodPost,
-		},
-		cmdvcwallet.ProveMethod: {
-			Path: opvcwallet.ProvePath, Method: http.MethodPost,
-		},
-		cmdvcwallet.VerifyMethod: {
-			Path: opvcwallet.VerifyPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.DeriveMethod: {
-			Path: opvcwallet.DerivePath, Method: http.MethodPost,
-		},
-		cmdvcwallet.CreateKeyPairMethod: {
-			Path: opvcwallet.CreateKeyPairPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.ConnectMethod: {
-			Path: opvcwallet.ConnectPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.ProposePresentationMethod: {
-			Path: opvcwallet.ProposePresentationPath, Method: http.MethodPost,
-		},
-		cmdvcwallet.PresentProofMethod: {
-			Path: opvcwallet.PresentProofPath, Method: http.MethodPost,
+		didclient1.ResolveOrbDIDCommandMethod: {
+			Method: http.MethodPost,
+			Path:   didclient.ResolveOrbDID,
 		},
 	}
-}
-
-func getLDEndpoints() map[string]*endpoint {
-	return map[string]*endpoint{
-		cmdld.AddContextsCommandMethod: {
-			Path: opld.AddContextsPath, Method: http.MethodPost,
-		},
-		cmdld.AddRemoteProviderCommandMethod: {
-			Path: opld.AddRemoteProviderPath, Method: http.MethodPost,
-		},
-		cmdld.RefreshRemoteProviderCommandMethod: {
-			Path: opld.RefreshRemoteProviderPath, Method: http.MethodPost,
-		},
-		cmdld.DeleteRemoteProviderCommandMethod: {
-			Path: opld.DeleteRemoteProviderPath, Method: http.MethodDelete,
-		},
-		cmdld.GetAllRemoteProvidersCommandMethod: {
-			Path: opld.GetAllRemoteProvidersPath, Method: http.MethodGet,
-		},
-		cmdld.RefreshAllRemoteProvidersCommandMethod: {
-			Path: opld.RefreshAllRemoteProvidersPath, Method: http.MethodPost,
-		},
-	}
+	return endpoints
 }

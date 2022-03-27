@@ -85,4 +85,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/trustbloc/agent-sdk => ../../
+replace github.com/trustbloc/agent-sdk => /home/mjolk/godev/agent-sdk-local
+
+replace github.com/hyperledger/aries-framework-go => /home/mjolk/godev/aries-framework-go-local

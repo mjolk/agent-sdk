@@ -18,10 +18,10 @@ import (
 
 // constants for endpoints of DIDClient.
 const (
-	OperationID       = "/didclient"
-	CreateOrbDIDPath  = OperationID + "/create-orb-did"
-	CreatePeerDIDPath = OperationID + "/create-peer-did"
-	ResolveOrbDIDPath = OperationID + "/resolve-orb-did"
+	OperationID   = "/didclient"
+	CreateOrbDID  = OperationID + "/create-orb-did"
+	CreatePeerDID = OperationID + "/create-peer-did"
+	ResolveOrbDID = OperationID + "/resolve-orb-did"
 )
 
 // Operation is controller REST service controller for DID Client.
@@ -53,9 +53,9 @@ func (c *Operation) GetRESTHandlers() []rest.Handler {
 func (c *Operation) registerHandler() {
 	// Add more protocol endpoints here to expose them as controller API endpoints
 	c.handlers = []rest.Handler{
-		cmdutil.NewHTTPHandler(CreateOrbDIDPath, http.MethodPost, c.CreateOrbDID),
-		cmdutil.NewHTTPHandler(CreatePeerDIDPath, http.MethodPost, c.CreatePeerDID),
-		cmdutil.NewHTTPHandler(ResolveOrbDIDPath, http.MethodPost, c.ResolveOrbDID),
+		cmdutil.NewHTTPHandler(CreateOrbDID, http.MethodPost, c.CreateOrbDID),
+		cmdutil.NewHTTPHandler(CreatePeerDID, http.MethodPost, c.CreatePeerDID),
+		cmdutil.NewHTTPHandler(ResolveOrbDID, http.MethodPost, c.ResolveOrbDID),
 	}
 }
 

@@ -11,38 +11,20 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/didexchange"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/introduce"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/issuecredential"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/kms"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/ld"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/mediator"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/messaging"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofband"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofbandv2"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/presentproof"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/vcwallet"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/vdr"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/rest/verifiable"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
 
 	"github.com/trustbloc/agent-sdk/cmd/agent-mobile/pkg/api"
 	"github.com/trustbloc/agent-sdk/cmd/agent-mobile/pkg/wrappers/config"
-	"github.com/trustbloc/agent-sdk/pkg/controller/rest/blindedrouting"
-	"github.com/trustbloc/agent-sdk/pkg/controller/rest/didclient"
-	"github.com/trustbloc/agent-sdk/pkg/controller/rest/mediatorclient"
 )
 
 // Aries is an Aries implementation with endpoints to execute operations.
 type Aries struct {
-	endpoints map[string]map[string]*endpoint
+	endpoints map[string]map[string]endpoint
 
 	URL          string
 	WebsocketURL string
@@ -172,164 +154,4 @@ func (ar *Aries) UnregisterHandler(id string) {
 			}
 		}
 	}
-}
-
-// GetIntroduceController returns an Introduce instance.
-func (ar *Aries) GetIntroduceController() (api.IntroduceController, error) {
-	endpoints, ok := ar.endpoints[introduce.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", introduce.OperationID)
-	}
-
-	return &Introduce{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetVerifiableController returns an Verifiable instance.
-func (ar *Aries) GetVerifiableController() (api.VerifiableController, error) {
-	endpoints, ok := ar.endpoints[verifiable.VerifiableOperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", verifiable.VerifiableOperationID)
-	}
-
-	return &Verifiable{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetDIDClient returns a DIDClient instance.
-func (ar *Aries) GetDIDClient() (api.DIDClient, error) {
-	endpoints, ok := ar.endpoints[didclient.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", didclient.OperationID)
-	}
-
-	return &DIDClient{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetDIDExchangeController returns a DIDExchange instance.
-func (ar *Aries) GetDIDExchangeController() (api.DIDExchangeController, error) {
-	endpoints, ok := ar.endpoints[didexchange.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", didexchange.OperationID)
-	}
-
-	return &DIDExchange{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetIssueCredentialController returns an IssueCredential instance.
-func (ar *Aries) GetIssueCredentialController() (api.IssueCredentialController, error) {
-	endpoints, ok := ar.endpoints[issuecredential.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", issuecredential.OperationID)
-	}
-
-	return &IssueCredential{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetPresentProofController returns a PresentProof instance.
-func (ar *Aries) GetPresentProofController() (api.PresentProofController, error) {
-	endpoints, ok := ar.endpoints[presentproof.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", presentproof.OperationID)
-	}
-
-	return &PresentProof{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetVDRController returns a VDR instance.
-func (ar *Aries) GetVDRController() (api.VDRController, error) {
-	endpoints, ok := ar.endpoints[vdr.VDROperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", vdr.VDROperationID)
-	}
-
-	return &VDR{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetMediatorController returns a Mediator instance.
-func (ar *Aries) GetMediatorController() (api.MediatorController, error) {
-	endpoints, ok := ar.endpoints[mediator.RouteOperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", mediator.RouteOperationID)
-	}
-
-	return &Mediator{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetMessagingController returns a Messaging instance.
-func (ar *Aries) GetMessagingController() (api.MessagingController, error) {
-	endpoints, ok := ar.endpoints[messaging.MsgServiceOperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", messaging.MsgServiceOperationID)
-	}
-
-	return &Messaging{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetOutOfBandController returns a OutOfBand instance.
-func (ar *Aries) GetOutOfBandController() (api.OutOfBandController, error) {
-	endpoints, ok := ar.endpoints[outofband.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", outofband.OperationID)
-	}
-
-	return &OutOfBand{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetOutOfBandV2Controller returns a OutOfBandV2 instance.
-func (ar *Aries) GetOutOfBandV2Controller() (api.OutOfBandV2Controller, error) {
-	endpoints, ok := ar.endpoints[outofbandv2.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", outofbandv2.OperationID)
-	}
-
-	return &OutOfBandV2{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetKMSController returns a KMS instance.
-func (ar *Aries) GetKMSController() (api.KMSController, error) {
-	endpoints, ok := ar.endpoints[kms.KmsOperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", kms.KmsOperationID)
-	}
-
-	return &KMS{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetMediatorClientController returns a MediatorClient instance.
-func (ar *Aries) GetMediatorClientController() (api.MediatorClient, error) {
-	endpoints, ok := ar.endpoints[mediatorclient.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", mediatorclient.OperationID)
-	}
-
-	return &MediatorClient{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetBlindedRoutingController returns a BlindedRoutingClient instance.
-func (ar *Aries) GetBlindedRoutingController() (api.BlindedRoutingController, error) {
-	endpoints, ok := ar.endpoints[blindedrouting.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", blindedrouting.OperationID)
-	}
-
-	return &BlindedRouting{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetVCWalletController returns a VCWalletController instance.
-func (ar *Aries) GetVCWalletController() (api.VCWalletController, error) {
-	endpoints, ok := ar.endpoints[vcwallet.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", vcwallet.OperationID)
-	}
-
-	return &VCWallet{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
-}
-
-// GetLDController returns an LD instance.
-func (ar *Aries) GetLDController() (api.LDController, error) {
-	endpoints, ok := ar.endpoints[ld.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no endpoints found for controller [%s]", ld.OperationID)
-	}
-
-	return &LD{endpoints: endpoints, URL: ar.URL, Token: ar.Token, httpClient: &http.Client{}}, nil
 }

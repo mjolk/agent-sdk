@@ -19,19 +19,6 @@ import (
 	"github.com/hyperledger/aries-framework-go/pkg/common/log"
 	"github.com/hyperledger/aries-framework-go/pkg/controller"
 	"github.com/hyperledger/aries-framework-go/pkg/controller/command"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/didexchange"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/introduce"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/issuecredential"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/kms"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/ld"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/mediator"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/messaging"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/outofband"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/outofbandv2"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/presentproof"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/vcwallet"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/vdr"
-	"github.com/hyperledger/aries-framework-go/pkg/controller/command/verifiable"
 	"github.com/hyperledger/aries-framework-go/pkg/didcomm/messaging/msghandler"
 	arieshttp "github.com/hyperledger/aries-framework-go/pkg/didcomm/transport/http"
 	"github.com/hyperledger/aries-framework-go/pkg/didcomm/transport/ws"
@@ -46,9 +33,6 @@ import (
 	"github.com/trustbloc/agent-sdk/cmd/agent-mobile/pkg/wrappers/storage"
 	sdkcontroller "github.com/trustbloc/agent-sdk/pkg/controller"
 	sdkcommand "github.com/trustbloc/agent-sdk/pkg/controller/command"
-	"github.com/trustbloc/agent-sdk/pkg/controller/command/blindedrouting"
-	"github.com/trustbloc/agent-sdk/pkg/controller/command/didclient"
-	"github.com/trustbloc/agent-sdk/pkg/controller/command/mediatorclient"
 )
 
 var logger = log.New("aries-agent-mobile/wrappers/command")
@@ -263,156 +247,6 @@ func (a *Aries) UnregisterHandler(id string) {
 	}
 }
 
-// GetIntroduceController returns an Introduce instance.
-func (a *Aries) GetIntroduceController() (api.IntroduceController, error) {
-	handlers, ok := a.handlers[introduce.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", introduce.CommandName)
-	}
-
-	return &Introduce{handlers: handlers}, nil
-}
-
-// GetVerifiableController returns a Verifiable instance.
-func (a *Aries) GetVerifiableController() (api.VerifiableController, error) {
-	handlers, ok := a.handlers[verifiable.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", verifiable.CommandName)
-	}
-
-	return &Verifiable{handlers: handlers}, nil
-}
-
-// GetDIDClient returns a DIDClient instance.
-func (a *Aries) GetDIDClient() (api.DIDClient, error) {
-	handlers, ok := a.handlers[didclient.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", didexchange.CommandName)
-	}
-
-	return &DIDClient{handlers: handlers}, nil
-}
-
-// GetDIDExchangeController returns a DIDExchange instance.
-func (a *Aries) GetDIDExchangeController() (api.DIDExchangeController, error) {
-	handlers, ok := a.handlers[didexchange.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", didexchange.CommandName)
-	}
-
-	return &DIDExchange{handlers: handlers}, nil
-}
-
-// GetIssueCredentialController returns an IssueCredential instance.
-func (a *Aries) GetIssueCredentialController() (api.IssueCredentialController, error) {
-	handlers, ok := a.handlers[issuecredential.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", issuecredential.CommandName)
-	}
-
-	return &IssueCredential{handlers: handlers}, nil
-}
-
-// GetPresentProofController returns an PresentProof instance.
-func (a *Aries) GetPresentProofController() (api.PresentProofController, error) {
-	handlers, ok := a.handlers[presentproof.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", presentproof.CommandName)
-	}
-
-	return &PresentProof{handlers: handlers}, nil
-}
-
-// GetVDRController returns a VDR instance.
-func (a *Aries) GetVDRController() (api.VDRController, error) {
-	handlers, ok := a.handlers[vdr.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", vdr.CommandName)
-	}
-
-	return &VDR{handlers: handlers}, nil
-}
-
-// GetMediatorController returns a Mediator instance.
-func (a *Aries) GetMediatorController() (api.MediatorController, error) {
-	handlers, ok := a.handlers[mediator.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", mediator.CommandName)
-	}
-
-	return &Mediator{handlers: handlers}, nil
-}
-
-// GetMessagingController returns a Messaging instance.
-func (a *Aries) GetMessagingController() (api.MessagingController, error) {
-	handlers, ok := a.handlers[messaging.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", messaging.CommandName)
-	}
-
-	return &Messaging{handlers: handlers}, nil
-}
-
-// GetOutOfBandController returns a OutOfBand instance.
-func (a *Aries) GetOutOfBandController() (api.OutOfBandController, error) {
-	handlers, ok := a.handlers[outofband.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", outofband.CommandName)
-	}
-
-	return &OutOfBand{handlers: handlers}, nil
-}
-
-// GetOutOfBandV2Controller returns a OutOfBandV2 instance.
-func (a *Aries) GetOutOfBandV2Controller() (api.OutOfBandV2Controller, error) {
-	handlers, ok := a.handlers[outofbandv2.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", outofbandv2.CommandName)
-	}
-
-	return &OutOfBandV2{handlers: handlers}, nil
-}
-
-// GetKMSController returns a KMS instance.
-func (a *Aries) GetKMSController() (api.KMSController, error) {
-	handlers, ok := a.handlers[kms.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", kms.CommandName)
-	}
-
-	return &KMS{handlers: handlers}, nil
-}
-
-// GetMediatorClientController returns a MediatorClient instance.
-func (a *Aries) GetMediatorClientController() (api.MediatorClient, error) {
-	handlers, ok := a.handlers[mediatorclient.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", mediatorclient.CommandName)
-	}
-
-	return &MediatorClient{handlers: handlers}, nil
-}
-
-// GetBlindedRoutingController returns a BlindedRoutingClient instance.
-func (a *Aries) GetBlindedRoutingController() (api.BlindedRoutingController, error) {
-	handlers, ok := a.handlers[blindedrouting.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", blindedrouting.CommandName)
-	}
-
-	return &BlindedRouting{handlers: handlers}, nil
-}
-
-// GetLDController returns an LD instance.
-func (a *Aries) GetLDController() (api.LDController, error) {
-	handlers, ok := a.handlers[ld.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", ld.CommandName)
-	}
-
-	return &LD{handlers: handlers}, nil
-}
-
 func createVDRs(resolvers []string, trustblocDomain string) ([]ariesvdr.VDR, error) {
 	const numPartsResolverOption = 2
 	// set maps resolver to its methods
@@ -468,14 +302,4 @@ func createVDRs(resolvers []string, trustblocDomain string) ([]ariesvdr.VDR, err
 	VDRs = append(VDRs, blocVDR)
 
 	return VDRs, nil
-}
-
-// GetVCWalletController returns a VCWalletController instance.
-func (a *Aries) GetVCWalletController() (api.VCWalletController, error) {
-	handlers, ok := a.handlers[vcwallet.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", vcwallet.CommandName)
-	}
-
-	return &VCWallet{handlers: handlers}, nil
 }
