@@ -13,14 +13,15 @@ MOBILE_BUILD_PACKAGES := $(MOBILE_PROJECT_ROOT)/...
 
 MAKEFILE_DIR := ${CURDIR}
 BUILD_DIR = $(MAKEFILE_DIR)/build
-LDFLAGS ?= '-s -w'
+LDFLAGS ?= '-s -w -v'
+CFLAGS ?= '$(ACGO_CFLAGS)'
 
 ANDROID_BUILD_DIR = $(BUILD_DIR)/android
 ANDROID_OUTPUT_FILE_NAME = agent-sdk.aar
 ifeq ($(ANDROID_TARGET),)
-	ANDROID_TARGET = android
+	ANDROID_TARGET = android/arm64
 endif
-ANDROID_JAVA_PKG = org.trustbloc.agent.sdk
+ANDROID_JAVA_PKG = org.hyperledger.aries
 
 IOS_BUILD_DIR = $(BUILD_DIR)/ios
 IOS_OUTPUT_FILE_NAME = AgentSDK.framework
@@ -80,7 +81,7 @@ bindings-android:
 	@echo '   gomobile: Creating Android bindings  '
 	@echo '----------------------------------------'
 	@mkdir -p $(ANDROID_BUILD_DIR)
-	$(GOMOBILE_CMD) bind -v -ldflags $(LDFLAGS) -target=$(ANDROID_TARGET) -javapkg=$(ANDROID_JAVA_PKG) -o=$(ANDROID_BUILD_DIR)/$(ANDROID_OUTPUT_FILE_NAME) $(MOBILE_BUILD_PACKAGES)
+	$(GOMOBILE_CMD) bind -v -ldflags=$(LDFLAGS) -target=$(ANDROID_TARGET) -javapkg=$(ANDROID_JAVA_PKG) -o=$(ANDROID_BUILD_DIR)/$(ANDROID_OUTPUT_FILE_NAME) $(MOBILE_BUILD_PACKAGES)
 
 .PHONY: bindings-ios
 bindings-ios:

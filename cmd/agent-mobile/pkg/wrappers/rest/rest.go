@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 
@@ -25,10 +26,10 @@ type httpClient interface {
 	Do(r *http.Request) (*http.Response, error)
 }
 
-func exec(url, token string, httpClient httpClient, endpoint endpoint, request []byte) ([]byte, error) {
-	parsedURL, err := url.Parse(url)
+func exec(u, token string, httpClient httpClient, endpoint endpoint, request []byte) ([]byte, error) {
+	parsedURL, err := url.Parse(u)
 	if err != nil {
-		return []byte{}, fmt.Errorf("failed to parse url [%s]: %v", url, err)
+		return []byte{}, fmt.Errorf("failed to parse url [%s]: %v", u, err)
 	}
 
 	parsedURL.Path = path.Join(parsedURL.Path, endpoint.Path)

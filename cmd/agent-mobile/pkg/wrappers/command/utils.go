@@ -11,6 +11,6 @@ func writeResponse(w *bytes.Buffer) []byte {
 }
 
 type Response struct {
-	Error   error  `json:"error"`
+	Error   string `json:"error"`
 	Payload []byte `json:"payload"`
 }

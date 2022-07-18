@@ -8,12 +8,15 @@ SPDX-License-Identifier: Apache-2.0
 package command
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/hyperledger/aries-framework-go-ext/component/vdr/indy"
 	"github.com/hyperledger/aries-framework-go-ext/component/vdr/orb"
 	"github.com/hyperledger/aries-framework-go/component/storageutil/mem"
 	"github.com/hyperledger/aries-framework-go/pkg/common/log"
@@ -119,7 +122,7 @@ func prepareFrameworkOptions(opts *config.Options, // nolint: gocyclo
 		options = append(options, aries.WithStoreProvider(mem.NewProvider()))
 	}
 
-	VDRs, err := createVDRs(opts.HTTPResolvers, opts.TrustblocDomain)
+	VDRs, err := createVDRs(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -144,45 +147,11 @@ func prepareFrameworkOptions(opts *config.Options, // nolint: gocyclo
 		}
 	}
 
-	if len(opts.HTTPResolvers) > 0 {
-		rsopts, err := getResolverOpts(opts.HTTPResolvers)
-		if err != nil {
-			return nil, fmt.Errorf("failed to prepare http resolver opts : %w", err)
-		}
-
-		options = append(options, rsopts...)
-	}
-
 	if opts.DocumentLoader != nil {
 		options = append(options, aries.WithJSONLDDocumentLoader(opts.DocumentLoader))
 	}
 
 	return options, nil
-}
-
-func getResolverOpts(httpResolvers []string) ([]aries.Option, error) {
-	var opts []aries.Option
-
-	const numPartsResolverOption = 2
-
-	if len(httpResolvers) > 0 {
-		for _, httpResolver := range httpResolvers {
-			r := strings.Split(httpResolver, "@")
-			if len(r) != numPartsResolverOption {
-				return nil, fmt.Errorf("invalid http resolver options found")
-			}
-
-			httpVDR, err := httpbinding.New(r[1],
-				httpbinding.WithAccept(func(method string) bool { return method == r[0] }))
-			if err != nil {
-				return nil, fmt.Errorf("failed to setup http resolver :  %w", err)
-			}
-
-			opts = append(opts, aries.WithVDR(httpVDR))
-		}
-	}
-
-	return opts, nil
 }
 
 func populateHandlers(commands []command.Handler, pkgMap map[string]map[string]command.Exec) {
@@ -247,7 +216,8 @@ func (a *Aries) UnregisterHandler(id string) {
 	}
 }
 
-func createVDRs(resolvers []string, trustblocDomain string) ([]ariesvdr.VDR, error) {
+func createVDRs(opts *config.Options) ([]ariesvdr.VDR, error) {
+	var vdrErr error
 	const numPartsResolverOption = 2
 	// set maps resolver to its methods
 	// e.g the set of ["trustbloc@http://resolver.com", "v1@http://resolver.com"] will be
@@ -258,7 +228,7 @@ func createVDRs(resolvers []string, trustblocDomain string) ([]ariesvdr.VDR, err
 
 	idx := -1
 
-	for _, resolver := range resolvers {
+	for _, resolver := range opts.HTTPResolvers {
 		r := strings.Split(resolver, "@")
 		if len(r) != numPartsResolverOption {
 			return nil, fmt.Errorf("invalid http resolver options found: %s", resolver)
@@ -291,15 +261,43 @@ func createVDRs(resolvers []string, trustblocDomain string) ([]ariesvdr.VDR, err
 		VDRs[order[url]] = resolverVDR
 	}
 
+	if opts.TrustblocDomain != "" {
+		VDRs, vdrErr = addOrbVDR(opts.TrustblocDomain, VDRs)
+		if vdrErr != nil {
+			return nil, vdrErr
+		}
+	}
+
+	if len(opts.IndyGenesis) > 0 {
+		VDRs, vdrErr = addIndyVDR(opts.IndyGenesis, VDRs)
+		if vdrErr != nil {
+			return nil, vdrErr
+		}
+
+	}
+
+	return VDRs, nil
+}
+
+func addIndyVDR(genesisData []byte, vdrs []ariesvdr.VDR) ([]ariesvdr.VDR, error) {
+	indyVDR, err := indy.New("sov", indy.WithIndyVDRGenesisReader(
+		io.NopCloser(bytes.NewReader(genesisData))))
+	if err != nil {
+		return nil, err
+	}
+
+	return append(vdrs, indyVDR), err
+
+}
+
+func addOrbVDR(domain string, vdrs []ariesvdr.VDR) ([]ariesvdr.VDR, error) {
 	blocVDR, err := orb.New(nil,
-		orb.WithDomain(trustblocDomain),
+		orb.WithDomain(domain),
 		orb.WithHTTPClient(http.DefaultClient),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	VDRs = append(VDRs, blocVDR)
-
-	return VDRs, nil
+	return append(vdrs, blocVDR), nil
 }

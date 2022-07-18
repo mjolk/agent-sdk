@@ -79,14 +79,14 @@ type MessagingController interface {
 	Send([]byte) []byte
 	Reply([]byte) []byte
 }
-type OutofBandController interface {
+type OutOfBandController interface {
 	CreateInvitation([]byte) []byte
 	AcceptInvitation([]byte) []byte
 	ActionStop([]byte) []byte
 	Actions([]byte) []byte
 	ActionContinue([]byte) []byte
 }
-type OutofBandV2Controller interface {
+type OutOfBandV2Controller interface {
 	CreateInvitation([]byte) []byte
 	AcceptInvitation([]byte) []byte
 }
@@ -108,7 +108,6 @@ type PresentProofController interface {
 	AcceptPresentation([]byte) []byte
 	DeclinePresentation([]byte) []byte
 }
-type Rfc0593Controller interface{}
 type VCWalletController interface {
 	CreateProfile([]byte) []byte
 	UpdateProfile([]byte) []byte

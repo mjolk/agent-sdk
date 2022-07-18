@@ -1,22 +1,23 @@
 package api
 
 type AriesController interface {
-	GetConnectionController() ConnectionController
-	GetDIDExchangeController() DIDExchangeController
-	GetIntroduceController() IntroduceController
-	GetIssueCredentialController() IssueCredentialController
-	GetKMSController() KMSController
-	GetLDController() LDController
-	GetMediatorController() MediatorController
-	GetMessagingController() MessagingController
-	GetOutofBandController() OutofBandController
-	GetOutofBandV2Controller() OutofBandV2Controller
-	GetPresentProofController() PresentProofController
-	GetRfc0593Controller() Rfc0593Controller
-	GetVCWalletController() VCWalletController
-	GetVDRController() VDRController
-	GetVerifiableController() VerifiableController
-	GetBlindedRoutingController() BlindedRoutingController
-	GetDidClientController() DidClientController
-	GetMediatorClientController() MediatorClientController
+	GetConnectionController() (ConnectionController, error)
+	GetDIDExchangeController() (DIDExchangeController, error)
+	GetIntroduceController() (IntroduceController, error)
+	GetIssueCredentialController() (IssueCredentialController, error)
+	GetKMSController() (KMSController, error)
+	GetLDController() (LDController, error)
+	GetMediatorController() (MediatorController, error)
+	GetMessagingController() (MessagingController, error)
+	GetOutOfBandController() (OutOfBandController, error)
+	GetOutOfBandV2Controller() (OutOfBandV2Controller, error)
+	GetPresentProofController() (PresentProofController, error)
+	GetVCWalletController() (VCWalletController, error)
+	GetVDRController() (VDRController, error)
+	GetVerifiableController() (VerifiableController, error)
+	GetBlindedRoutingController() (BlindedRoutingController, error)
+	GetDidClientController() (DidClientController, error)
+	GetMediatorClientController() (MediatorClientController, error)
+	RegisterHandler(handler Handler, topics string) string
+	UnregisterHandler(id string)
 }

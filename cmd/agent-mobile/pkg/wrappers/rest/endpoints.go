@@ -26,7 +26,6 @@ import (
 	outofband "github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofband"
 	outofbandv2 "github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofbandv2"
 	presentproof "github.com/hyperledger/aries-framework-go/pkg/controller/rest/presentproof"
-	rfc0593 "github.com/hyperledger/aries-framework-go/pkg/controller/rest/rfc0593"
 	vcwallet "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vcwallet"
 	vdr "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vdr"
 	verifiable "github.com/hyperledger/aries-framework-go/pkg/controller/rest/verifiable"
@@ -410,7 +409,6 @@ func EndPoints() map[string]map[string]endpoint {
 			Path:   presentproof.SendRequestPresentationV3,
 		},
 	}
-	endpoints[rfc0593.OperationID] = map[string]endpoint{}
 	endpoints[vcwallet.OperationID] = map[string]endpoint{
 		vcwallet1.AddCommandMethod: {
 			Method: http.MethodPost,

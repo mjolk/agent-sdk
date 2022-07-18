@@ -13,7 +13,6 @@ import (
 	outofband "github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofband"
 	outofbandv2 "github.com/hyperledger/aries-framework-go/pkg/controller/rest/outofbandv2"
 	presentproof "github.com/hyperledger/aries-framework-go/pkg/controller/rest/presentproof"
-	rfc0593 "github.com/hyperledger/aries-framework-go/pkg/controller/rest/rfc0593"
 	vcwallet "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vcwallet"
 	vdr "github.com/hyperledger/aries-framework-go/pkg/controller/rest/vdr"
 	verifiable "github.com/hyperledger/aries-framework-go/pkg/controller/rest/verifiable"
@@ -120,24 +119,24 @@ func (a *Aries) GetMessagingController() (api.MessagingController, error) {
 		httpClient: &http.Client{},
 	}, nil
 }
-func (a *Aries) GetOutofBandController() (api.OutofBandController, error) {
+func (a *Aries) GetOutOfBandController() (api.OutOfBandController, error) {
 	endpoints, ok := a.endpoints[outofband.OperationID]
 	if !ok {
 		return nil, fmt.Errorf("no handlers found for controller [%s]", outofband.OperationID)
 	}
-	return &OutofBand{
+	return &OutOfBand{
 		Token:      a.Token,
 		URL:        a.URL,
 		endpoints:  endpoints,
 		httpClient: &http.Client{},
 	}, nil
 }
-func (a *Aries) GetOutofBandV2Controller() (api.OutofBandV2Controller, error) {
+func (a *Aries) GetOutOfBandV2Controller() (api.OutOfBandV2Controller, error) {
 	endpoints, ok := a.endpoints[outofbandv2.OperationID]
 	if !ok {
 		return nil, fmt.Errorf("no handlers found for controller [%s]", outofbandv2.OperationID)
 	}
-	return &OutofBandV2{
+	return &OutOfBandV2{
 		Token:      a.Token,
 		URL:        a.URL,
 		endpoints:  endpoints,
@@ -150,18 +149,6 @@ func (a *Aries) GetPresentProofController() (api.PresentProofController, error) 
 		return nil, fmt.Errorf("no handlers found for controller [%s]", presentproof.OperationID)
 	}
 	return &PresentProof{
-		Token:      a.Token,
-		URL:        a.URL,
-		endpoints:  endpoints,
-		httpClient: &http.Client{},
-	}, nil
-}
-func (a *Aries) GetRfc0593Controller() (api.Rfc0593Controller, error) {
-	endpoints, ok := a.endpoints[rfc0593.OperationID]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", rfc0593.OperationID)
-	}
-	return &Rfc0593{
 		Token:      a.Token,
 		URL:        a.URL,
 		endpoints:  endpoints,

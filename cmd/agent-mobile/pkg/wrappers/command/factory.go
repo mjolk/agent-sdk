@@ -13,7 +13,6 @@ import (
 	outofband "github.com/hyperledger/aries-framework-go/pkg/controller/command/outofband"
 	outofbandv2 "github.com/hyperledger/aries-framework-go/pkg/controller/command/outofbandv2"
 	presentproof "github.com/hyperledger/aries-framework-go/pkg/controller/command/presentproof"
-	rfc0593 "github.com/hyperledger/aries-framework-go/pkg/controller/command/rfc0593"
 	vcwallet "github.com/hyperledger/aries-framework-go/pkg/controller/command/vcwallet"
 	vdr "github.com/hyperledger/aries-framework-go/pkg/controller/command/vdr"
 	verifiable "github.com/hyperledger/aries-framework-go/pkg/controller/command/verifiable"
@@ -79,19 +78,19 @@ func (a *Aries) GetMessagingController() (api.MessagingController, error) {
 	}
 	return &Messaging{handlers: handlers}, nil
 }
-func (a *Aries) GetOutofBandController() (api.OutofBandController, error) {
+func (a *Aries) GetOutOfBandController() (api.OutOfBandController, error) {
 	handlers, ok := a.handlers[outofband.CommandName]
 	if !ok {
 		return nil, fmt.Errorf("no handlers found for controller [%s]", outofband.CommandName)
 	}
-	return &OutofBand{handlers: handlers}, nil
+	return &OutOfBand{handlers: handlers}, nil
 }
-func (a *Aries) GetOutofBandV2Controller() (api.OutofBandV2Controller, error) {
+func (a *Aries) GetOutOfBandV2Controller() (api.OutOfBandV2Controller, error) {
 	handlers, ok := a.handlers[outofbandv2.CommandName]
 	if !ok {
 		return nil, fmt.Errorf("no handlers found for controller [%s]", outofbandv2.CommandName)
 	}
-	return &OutofBandV2{handlers: handlers}, nil
+	return &OutOfBandV2{handlers: handlers}, nil
 }
 func (a *Aries) GetPresentProofController() (api.PresentProofController, error) {
 	handlers, ok := a.handlers[presentproof.CommandName]
@@ -99,13 +98,6 @@ func (a *Aries) GetPresentProofController() (api.PresentProofController, error) 
 		return nil, fmt.Errorf("no handlers found for controller [%s]", presentproof.CommandName)
 	}
 	return &PresentProof{handlers: handlers}, nil
-}
-func (a *Aries) GetRfc0593Controller() (api.Rfc0593Controller, error) {
-	handlers, ok := a.handlers[rfc0593.CommandName]
-	if !ok {
-		return nil, fmt.Errorf("no handlers found for controller [%s]", rfc0593.CommandName)
-	}
-	return &Rfc0593{handlers: handlers}, nil
 }
 func (a *Aries) GetVCWalletController() (api.VCWalletController, error) {
 	handlers, ok := a.handlers[vcwallet.CommandName]

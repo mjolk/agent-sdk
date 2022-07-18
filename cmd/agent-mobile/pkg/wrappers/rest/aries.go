@@ -40,7 +40,7 @@ func NewAries(opts *config.Options) (*Aries, error) {
 		return nil, errors.New("no agent url provided")
 	}
 
-	endpoints := getControllerEndpoints()
+	endpoints := EndPoints()
 
 	a := &Aries{
 		endpoints:    endpoints,

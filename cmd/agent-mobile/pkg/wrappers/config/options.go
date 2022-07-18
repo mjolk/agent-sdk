@@ -23,11 +23,11 @@ type Options struct {
 	TransportReturnRoute string
 	LogLevel             string
 	TrustblocDomain      string
-	TrustblocResolver    string
 	WebsocketURL         string
 	Logger               api.LoggerProvider
 	Storage              api.Provider
 	DocumentLoader       ld.DocumentLoader
+	IndyGenesis          []byte
 	// expected to be ignored by gomobile
 	// not intended to be used by golang code
 	HTTPResolvers     []string
